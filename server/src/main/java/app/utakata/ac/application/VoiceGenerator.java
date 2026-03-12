@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -50,8 +49,7 @@ public class VoiceGenerator {
             throw new IllegalArgumentException("speed must be greater than 0");
         }
 
-        List<String> voiceParts = getVoiceParts(voiceType);
-        Pattern pattern = buildVoicePartPattern(voiceParts);
+        Pattern pattern = buildVoicePartPattern(VoicePartAssets.supportedParts());
         List<Segment> segments = createSegments(text, speed, pattern, voiceType);
         if (segments.isEmpty()) {
             return;
@@ -98,20 +96,6 @@ public class VoiceGenerator {
         return segments;
     }
 
-    private List<String> getVoiceParts(VoiceType voiceType) {
-        Path voiceDir = getVoiceDir(voiceType);
-        try (var paths = Files.list(voiceDir)) {
-            return paths
-                    .map(path -> path.getFileName().toString())
-                    .filter(fileName -> fileName.endsWith(".mp3"))
-                    .map(this::removeExtension)
-                    .sorted(Comparator.comparingInt(String::length).reversed())
-                    .toList();
-        } catch (IOException e) {
-            throw new IllegalStateException("Failed to load voice parts from " + voiceDir, e);
-        }
-    }
-
     private Pattern buildVoicePartPattern(List<String> voiceParts) {
         String pattern = voiceParts.stream()
                 .map(Pattern::quote)
@@ -124,7 +108,7 @@ public class VoiceGenerator {
     }
 
     private Path getVoicePartPath(VoiceType voiceType, String part) {
-        return getVoiceDir(voiceType).resolve(part + ".mp3");
+        return getVoiceDir(voiceType).resolve(VoicePartAssets.fileNameFor(part) + ".mp3");
     }
 
     private Path createOutputPath() {
@@ -146,15 +130,6 @@ public class VoiceGenerator {
         chains.add(concatInputs + "concat=n=" + inputCount + ":v=0:a=1[outa]");
         return String.join(";", chains);
     }
-
-    private String removeExtension(String fileName) {
-        int lastDot = fileName.lastIndexOf('.');
-        if (lastDot < 0) {
-            return fileName;
-        }
-        return fileName.substring(0, lastDot);
-    }
-
     private sealed interface Segment permits Segment.AudioSegment, Segment.SilenceSegment {
         UrlInput toInput();
 
