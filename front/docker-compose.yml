@@ -1,0 +1,11 @@
+version: '2'
+services:
+  front:
+    container_name: "front"
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ".:/opt/pokemon_tool_front"
+    ports:
+      - '8080:8080'
