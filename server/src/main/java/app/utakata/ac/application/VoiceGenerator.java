@@ -5,31 +5,23 @@ import com.github.kokorin.jaffree.ffmpeg.FFmpeg;
 import com.github.kokorin.jaffree.ffmpeg.UrlInput;
 import com.github.kokorin.jaffree.ffmpeg.UrlOutput;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import org.jboss.logging.Logger;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 // ApplicationScoped は Quarkus の DI のアノテーションで、
 // アプリケーション全体で一つのインスタンスを使い回す（シングルトン）
 @ApplicationScoped
 public class VoiceGenerator {
     private static final int SILENT_MSEC = 500;
-
-    @Inject
-    Logger log;
 
     private final Path voiceAssetRoot;
     private final Path outputDir;
@@ -68,10 +60,6 @@ public class VoiceGenerator {
         for (Segment segment : segments) {
             ffmpeg.addInput(segment.toInput());
         }
-
-        logFfmpegPathStatus();
-        // TODO 検証が終了したら消す
-        logVoiceDirectoryContents(voiceType);
 
         ffmpeg
                 .setOverwriteOutput(true)
@@ -122,47 +110,6 @@ public class VoiceGenerator {
 
     private Path getVoicePartPath(VoiceType voiceType, String part) {
         return getVoiceDir(voiceType).resolve(VoicePartAssets.fileNameFor(part) + ".mp3");
-    }
-
-    private void logVoiceDirectoryContents(VoiceType voiceType) {
-        Path voiceDir = getVoiceDir(voiceType);
-        try (Stream<Path> paths = Files.list(voiceDir)) {
-            String entries = paths
-                    .map(path -> path.getFileName().toString())
-                    .sorted(Comparator.naturalOrder())
-                    .collect(Collectors.joining(", "));
-            log.info("Voice resource directory: " + voiceDir + " entries=[" + entries + "]");
-        } catch (IOException e) {
-            log.info("Failed to list voice resource directory: " + voiceDir, e);
-        }
-    }
-
-    private void logFfmpegPathStatus() {
-        Optional<Path> ffmpegPath = findExecutableOnPath("ffmpeg");
-        if (ffmpegPath.isPresent()) {
-            log.info("ffmpeg found on PATH: " + ffmpegPath.get());
-            return;
-        }
-        log.info("ffmpeg was not found on PATH");
-    }
-
-    private Optional<Path> findExecutableOnPath(String executableName) {
-        String pathEnv = System.getenv("PATH");
-        if (pathEnv == null || pathEnv.isBlank()) {
-            return Optional.empty();
-        }
-
-        for (String pathEntry : pathEnv.split(java.io.File.pathSeparator)) {
-            if (pathEntry.isBlank()) {
-                continue;
-            }
-
-            Path candidate = Path.of(pathEntry, executableName);
-            if (Files.isRegularFile(candidate) && Files.isExecutable(candidate)) {
-                return Optional.of(candidate);
-            }
-        }
-        return Optional.empty();
     }
 
     private Path createOutputPath() {
