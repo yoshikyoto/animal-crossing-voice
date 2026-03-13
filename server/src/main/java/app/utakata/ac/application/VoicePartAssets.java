@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 
 public final class VoicePartAssets {
+    // App Engine にデプロイするときに code build を使ったら、Code Build が日本語ファイルに対応していなかった
+    // よって、ファイル名はローマ字にして、ここで日本語とファイル名の対応を持つことにする
     private static final Map<String, String> PART_TO_FILE_NAME = Map.ofEntries(
             Map.entry("あ", "a"),
             Map.entry("い", "i"),

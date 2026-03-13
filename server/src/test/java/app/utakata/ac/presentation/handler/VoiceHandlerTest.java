@@ -30,7 +30,7 @@ class VoiceHandlerTest {
         private VoiceType voiceType;
 
         private SpyVoiceGenerator() {
-            super("../PokemonBattleTool/animal_crossing_voice", "/tmp");
+            super("src/main/resources/voice", "/tmp");
         }
 
         @Override

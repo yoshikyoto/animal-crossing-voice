@@ -5,6 +5,8 @@ import com.github.kokorin.jaffree.ffmpeg.FFmpeg;
 import com.github.kokorin.jaffree.ffmpeg.UrlInput;
 import com.github.kokorin.jaffree.ffmpeg.UrlOutput;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import org.jboss.logging.Logger;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import java.io.IOException;
@@ -22,6 +24,9 @@ import java.util.stream.Collectors;
 @ApplicationScoped
 public class VoiceGenerator {
     private static final int SILENT_MSEC = 500;
+
+    @Inject
+    Logger log;
 
     private final Path voiceAssetRoot;
     private final Path outputDir;
