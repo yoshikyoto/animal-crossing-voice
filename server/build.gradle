@@ -13,6 +13,7 @@ dependencies {
     implementation 'io.quarkus:quarkus-arc'
     implementation 'io.quarkus:quarkus-rest'
     implementation 'io.quarkus:quarkus-rest-jackson'
+    implementation 'io.quarkus:quarkus-hibernate-validator'
     // FFMpeg を利用するためのライブラリ
     implementation 'com.github.kokorin.jaffree:jaffree:2024.08.29'
     testImplementation 'io.quarkus:quarkus-junit'
