@@ -49,9 +49,9 @@ public class VoiceGenerator {
      * @param speed 1秒間に何文字読み上げるか
      * @param voiceType 声の高さ
      */
-    public void generate(String text, int speed, VoiceType voiceType) {
+    public Path generate(String text, int speed, VoiceType voiceType) {
         if (text == null || text.isBlank()) {
-            return;
+            throw new IllegalArgumentException("text must not be blank");
         }
         if (speed <= 0) {
             throw new IllegalArgumentException("speed must be greater than 0");
@@ -60,7 +60,7 @@ public class VoiceGenerator {
         Pattern pattern = buildVoicePartPattern(VoicePartAssets.supportedParts());
         List<Segment> segments = createSegments(text, speed, pattern, voiceType);
         if (segments.isEmpty()) {
-            return;
+            throw new IllegalArgumentException("No voice segments were generated");
         }
 
         Path outputPath = createOutputPath();
@@ -83,6 +83,7 @@ public class VoiceGenerator {
                                 .addMap("outa")
                 )
                 .execute();
+        return outputPath;
     }
 
     private List<Segment> createSegments(String text, int speed, Pattern pattern, VoiceType voiceType) {
